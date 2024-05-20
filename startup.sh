@@ -1,4 +1,4 @@
-# Discover serial port of your SO
+# Discover board serial port assigned in your SO
 cd /dev
 ls > ~/disconnect.txt
 # connect board
@@ -6,17 +6,15 @@ ls > ~/reconnect.txt
 diff ~/disconnect.txt ~/reconnect.txt
 # something like tty.usbserial-DN014TJU
 
-BOARD="stm32f429i_disc1"
-PORT="tty.usbmodem1103"
-PROJECT="1_progetto"
-readonly BOARD
-readonly PORT
+readonly BOARD="stm32f429i_disc1"
+readonly PORT="tty.usbmodem1103"
+PROJECT="2_integrazione"
 
 # Virtual environment
 source ~/zephyrproject/.venv/bin/activate
 cd ~/zephyrproject/zephyr
 
-# Build (auto pristine)
+#Build (auto pristine)
 west build --pristine auto --board $BOARD $PROJECT
 west flash
 
