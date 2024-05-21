@@ -3,6 +3,7 @@
 #
 #
 cmake_minimum_required(VERSION 3.20.0)
+
 set(BOARD stm32f429i_disc1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(2_integrazione)
@@ -14,12 +15,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 set(NO_THREADSAFE_STATICS $<TARGET_PROPERTY:compiler-cpp,no_threadsafe_statics>)
 zephyr_compile_options($<$<COMPILE_LANGUAGE:CXX>:${NO_THREADSAFE_STATICS}>)
 
-set (CMAKE_CXX_fLAGS "${CMAKE_CXX_FLAGS} -DCMAKE_PREFIX_PATH=${PROJECT_SOURCE_DIR}/TF_C_API/lib/libtensorflow.so")
-
-zephyr_include_directories(cppflow)
 zephyr_include_directories(TF_C_API/include/tensorflow/c)
-zephyr_include_directories(TF_C_API/include/tensorflow/core/platform)
-
 
 #FILE(GLOB includes STemWin/*)
 #include_directories(${includes})
@@ -32,23 +28,6 @@ zephyr_include_directories(TF_C_API/include/tensorflow/core/platform)
 
 #FILE(GLOB includes Drivers/BSP/*)
 #include_directories(${includes})
-
-### -------------------------- TF_C_API dependencies --------------------------- ###
-target_include_directories(app PUBLIC "${PROJECT_SOURCE_DIR}/TF_C_API/include/tensorflow/c/")
-target_include_directories(app PUBLIC "${PROJECT_SOURCE_DIR}/TF_C_API/include/tensorflow/c/eager/")
-target_include_directories(app PUBLIC "${PROJECT_SOURCE_DIR}/TF_C_API/include/tensorflow/core/platform/")
-target_include_directories(app PUBLIC "${PROJECT_SOURCE_DIR}/TF_C_API/include/tsl/c")
-target_include_directories(app PUBLIC "${PROJECT_SOURCE_DIR}/TF_C_API/include/tsl/platform/")
-
-
-add_library(TF_C_API STATIC IMPORTED)
-set_property(TARGET TF_C_API PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/TF_C_API/lib/libtensorflow.so")
-set_property(TARGET TF_C_API PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/TF_C_API/lib/libtensorflow_framework.so")
-
-### -------------------------- CPP_Flow dependencies --------------------------- ###
-FILE(GLOB includes cppflow/*.h)
-include_directories(${includes})
-target_include_directories(app PRIVATE cppflow)
 
 ### ------------------------ From Zephyr external lib documentation ------------- ###
 
@@ -65,6 +44,102 @@ zephyr_get_system_include_directories_for_lang_as_string(C system_includes)
 zephyr_get_compile_definitions_for_lang_as_string(       C definitions)
 zephyr_get_compile_options_for_lang_as_string(           C options)
 
+
+### -------------------------- Kerasify dependencies --------------------------- ###
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 17)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+      -W -Wall -Wextra -Wpedantic \
+      -Waggressive-loop-optimizations \
+      -Wcast-align -Wcast-qual \
+      -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond \
+      -Wfloat-equal -Wformat=2 -Wformat-signedness -Wframe-larger-than=32768 \
+      -Wlogical-op \
+      -Wnull-dereference \
+      -Wodr -Wold-style-cast \
+      -Wshadow=local -Wshift-overflow=2 -Wstrict-aliasing=2 -Wsuggest-final-methods -Wsuggest-final-types -Wsync-nand \
+      -Wtrampolines \
+      -Wuseless-cast -Wno-unused-but-set-parameter \
+      -Wwrite-strings"
+      CACHE INTERNAL ""
+  )
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+      -Weverything \
+      -Wno-class-varargs -Wno-padded \
+      -Wc++17-compat \
+      -Wno-c++98-compat -Wno-c++98-compat-pedantic"
+      # -Wno-c++14-extensions
+      # -Wno-c++17-extensions
+      # -Wno-switch-enum -Wno-unused-macros
+      CACHE INTERNAL ""
+  )
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g"
+    CACHE INTERNAL ""
+)
+
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} \
+    -g -pg -no-pie \
+    -O3 -ffast-math -fno-rtti"
+    CACHE INTERNAL ""
+)
+set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+    "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} -pg"
+    CACHE INTERNAL ""
+)
+
+# rolled loops works faster here
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} \
+    -O3 -ffast-math -fno-rtti"
+    CACHE INTERNAL ""
+)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Os"
+      CACHE INTERNAL "")
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} -Oz"
+      CACHE INTERNAL "")
+endif()
+
+set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} \
+    -O3 -ffast-math -fno-math-errno -fno-unroll-loops \
+    -fno-rtti -fno-stack-protector -fno-ident \
+    -fomit-frame-pointer -ffunction-sections -fdata-sections \
+    -fmerge-all-constants"
+    CACHE INTERNAL ""
+)
+
+# project configuration
+include_directories(app PRIVATE "./include")
+target_sources(app PRIVATE
+    src/io.cpp
+    src/layer.cpp
+    src/layer_weights.cpp
+    src/layers/activation.cpp
+    src/layers/conv1d.cpp
+    src/layers/conv2d.cpp
+    src/layers/dense.cpp
+    src/layers/elu.cpp
+    src/layers/embedding.cpp
+    src/layers/flatten.cpp
+    src/layers/lstm.cpp
+    src/layers/locally1d.cpp
+    src/layers/locally2d.cpp
+    src/layers/maxpooling2d.cpp
+    src/layers/normalization.cpp
+    src/model.cpp
+    src/model_test.cpp
+    src/tensor.cpp
+    src/utility.cpp
+)
 
 ###--------------------------------------------------------------------------------###
 
