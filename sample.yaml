@@ -1,3 +1,11 @@
 sample:
-  name: 2_integrazione
+  name: 1_progetto
+tests:
+  sample.tensorflow.1_progetto:
+    platform_allow: litex_vexriscv
+    tags: tensorflow
+    integration_platforms:
+      - litex_vexriscv
+    modules:
+      - tflite-micro
 
