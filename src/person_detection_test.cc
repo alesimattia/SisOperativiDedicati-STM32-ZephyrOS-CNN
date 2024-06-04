@@ -12,15 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-#include "no_person_image_data.h"
-#include "person_image_data.h"
-#include "person_detect_model_data.h"
 
 #include "tensorflow/lite/c/common.h"
-#include "model_settings.h"
+#include "tensorflow/lite/micro/examples/person_detection/model_settings.h"
+#include "tensorflow/lite/micro/examples/person_detection/testdata/no_person_image_data.h"
+#include "tensorflow/lite/micro/examples/person_detection/testdata/person_image_data.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/models/person_detect_model_data.h"
 #include "tensorflow/lite/micro/testing/micro_test.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
@@ -32,14 +32,12 @@ constexpr int tensor_arena_size = 136 * 1024;
 #endif  // defined(XTENSA) && defined(VISION_P6)
 uint8_t tensor_arena[tensor_arena_size];
 
-TF_LITE_MICRO_TESTS_BEGIN
 
-TF_LITE_MICRO_TEST(TestInvoke) {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  const tflite::Model* model = ::tflite::GetModel(g_person_detect_model_data);
+  const tflite::Model* model = tflite::GetModel(g_person_detect_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    MicroPrintf(
+    MicroMicroPrintf(
         "Model provided is schema version %d not equal "
         "to supported version %d.\n",
         model->version(), TFLITE_SCHEMA_VERSION);
@@ -76,15 +74,15 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteInt8, input->type);
 
   // Copy an image with a person into the memory area used for the input.
-                                                //original: g_person_image_data_size
+                                                //g_person_image_data_size
   TFLITE_DCHECK_EQ(input->bytes, static_cast<size_t>(g_person_data_size));
-                      //original: g_person_image_data
+                          //g_person_image_data
   memcpy(input->data.int8, g_person_data, input->bytes);
 
   // Run the model on this input and make sure it succeeds.
   TfLiteStatus invoke_status = interpreter.Invoke();
   if (invoke_status != kTfLiteOk) {
-    MicroPrintf("Invoke failed\n");
+    MicroMicroPrintf("Invoke failed\n");
   }
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
 
@@ -99,16 +97,16 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   // Make sure that the expected "Person" score is higher than the other class.
   int8_t person_score = output->data.int8[kPersonIndex];
   int8_t no_person_score = output->data.int8[kNotAPersonIndex];
-  MicroPrintf("person data.  person score: %d, no person score: %d\n",
+  MicroMicroPrintf("person data.  person score: %d, no person score: %d\n",
               person_score, no_person_score);
   TF_LITE_MICRO_EXPECT_GT(person_score, no_person_score);
-                            //original: g_no_person_image_data
+                              //g_no_person_image_data
   memcpy(input->data.int8, g_no_person_data, input->bytes);
 
   // Run the model on this "No Person" input.
   invoke_status = interpreter.Invoke();
   if (invoke_status != kTfLiteOk) {
-    MicroPrintf("Invoke failed\n");
+    MicroMicroPrintf("Invoke failed\n");
   }
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
 
@@ -123,11 +121,8 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   // Make sure that the expected "No Person" score is higher.
   person_score = output->data.int8[kPersonIndex];
   no_person_score = output->data.int8[kNotAPersonIndex];
-  MicroPrintf("no person data.  person score: %d, no person score: %d\n",
+  MicroMicroPrintf("no person data.  person score: %d, no person score: %d\n",
               person_score, no_person_score);
   TF_LITE_MICRO_EXPECT_GT(no_person_score, person_score);
 
-  MicroPrintf("Ran successfully\n");
-}
-
-TF_LITE_MICRO_TESTS_END
+  MicroMicroPrintf("Ran successfully\n");

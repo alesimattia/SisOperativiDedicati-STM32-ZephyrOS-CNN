@@ -15,9 +15,9 @@ limitations under the License.
 
 // See the header for documentation on the meaning of this data.
 
-#include "no_person_image_data.h"
+#include "tensorflow/lite/micro/examples/person_detection_experimental/no_person_image_data.h"
 
-#include "model_settings.h"
+#include "tensorflow/lite/micro/examples/person_detection_experimental/model_settings.h"
 
 const int g_no_person_data_size = kMaxImageSize;
 const uint8_t g_no_person_data[g_no_person_data_size] = {

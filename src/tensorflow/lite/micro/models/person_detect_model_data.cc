@@ -19,7 +19,7 @@ limitations under the License.
 // This form is useful for compiling into a binary for devices that don't have a
 // file system.
 
-#include "person_detect_model_data.h"
+#include "tensorflow/lite/micro/examples/person_detection_experimental/person_detect_model_data.h"
 
 // We need to keep the data array aligned on some architectures.
 #ifdef __has_attribute

@@ -21,9 +21,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/person_detection/model_settings.h"
 #include "tensorflow/lite/micro/testing/micro_test.h"
 
-TF_LITE_MICRO_TESTS_BEGIN
 
-TF_LITE_MICRO_TEST(TestImageProvider) {
   int8_t image_data[kMaxImageSize];
   TfLiteStatus get_status =
       GetImage(kNumCols, kNumRows, kNumChannels, image_data);
@@ -35,6 +33,3 @@ TF_LITE_MICRO_TEST(TestImageProvider) {
     total += image_data[i];
   }
   (void)total;
-}
-
-TF_LITE_MICRO_TESTS_END
