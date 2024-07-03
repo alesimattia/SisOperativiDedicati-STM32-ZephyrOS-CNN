@@ -18,7 +18,7 @@ west update
 #**********************  RUN  ***************************#
 readonly BOARD="stm32f429i_disc1"
 readonly PORT="tty.usbmodem1103"
-PROJECT="1_progetto"
+PROJECT="person_detector"
 
 # Attiva ambiente virtuale
 source ~/zephyrproject/.venv/bin/activate

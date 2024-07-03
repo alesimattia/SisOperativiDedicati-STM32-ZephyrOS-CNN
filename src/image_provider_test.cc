@@ -22,6 +22,7 @@ limitations under the License.
 #include "tensorflow/lite/micro/testing/micro_test.h"
 
 
+void TF_LITE_MICRO_TEST() {
   int8_t image_data[kMaxImageSize];
   TfLiteStatus get_status =
       GetImage(kNumCols, kNumRows, kNumChannels, image_data);
@@ -33,3 +34,4 @@ limitations under the License.
     total += image_data[i];
   }
   (void)total;
+}

@@ -17,9 +17,11 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/testing/micro_test.h"
 
+
+void TF_LITE_MICRO_TEST(){
   // This will have external side-effects (like printing to the debug console
   // or lighting an LED) that are hard to observe, so the most we can do is
   // make sure the call doesn't crash.
-  
-/*   RespondToDetection(-100, 100);
-  RespondToDetection(100, 50); */
+  RespondToDetection(-100, 100);
+  RespondToDetection(100, 50);
+}

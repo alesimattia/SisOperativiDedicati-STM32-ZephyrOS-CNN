@@ -19,18 +19,18 @@ limitations under the License.
 // Expose a C friendly interface for main functions.
 #ifdef __cplusplus
 extern "C" {
-#endif
+    #endif
 
-// Initializes all data needed for the example. The name is important, and needs
-// to be setup() for Arduino compatibility.
-void setup();
+    // Initializes all data needed for the example. The name is important, and needs
+    // to be setup() for Arduino compatibility.
+    void setup();
 
-// Runs one iteration of data gathering and inference. This should be called
-// repeatedly from the application code. The name needs to be loop() for Arduino
-// compatibility.
-void loop();
+    // Runs one iteration of data gathering and inference. This should be called
+    // repeatedly from the application code. The name needs to be loop() for Arduino
+    // compatibility.
+    void loop();
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
 }
 #endif
 
